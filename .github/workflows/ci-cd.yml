@@ -1,0 +1,175 @@
+name: CI/CD
+
+# - Pull request a main: compila y ejecuta las pruebas.
+# - Push a main: compila, prueba, publica las imágenes en GHCR y despliega en
+#   Kubernetes con un runner Windows propio (self-hosted).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1) Compilación y pruebas de cada microservicio
+  # ---------------------------------------------------------------------------
+  test:
+    name: Compilar y probar (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [auth-service, task-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: ${{ matrix.service }}/pom.xml
+
+      - name: mvn verify (compila + pruebas)
+        working-directory: ${{ matrix.service }}
+        run: mvn -B verify
+
+      - name: Guardar reportes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/surefire-reports
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # 2) Construcción y publicación de imágenes en GitHub Container Registry
+  # ---------------------------------------------------------------------------
+  publish:
+    name: Publicar imagen en GHCR (${{ matrix.service }})
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [auth-service, task-service, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nombre de la imagen (GHCR exige minúsculas)
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/${{ matrix.service }}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  # ---------------------------------------------------------------------------
+  # 3) Despliegue en Kubernetes desde el runner Windows propio
+  #    (Docker Desktop con Kubernetes activado; el runner usa su kubeconfig)
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Desplegar en Kubernetes (runner Windows)
+    needs: publish
+    if: github.event_name != 'pull_request'
+    runs-on: [self-hosted, windows]
+    permissions:
+      contents: read
+      packages: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      NAMESPACE: microservicios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar acceso al clúster
+        run: |
+          kubectl version --client
+          kubectl config current-context
+          kubectl get nodes
+
+      - name: Apuntar los manifiestos a las imágenes de GHCR
+        run: |
+          REPO="ghcr.io/${GITHUB_REPOSITORY,,}"
+          rm -rf k8s-rendered
+          cp -r k8s k8s-rendered
+          for svc in auth-service task-service frontend; do
+            sed -i "s|image: ${svc}:1.0.0|image: ${REPO}/${svc}:${GITHUB_SHA}|" k8s-rendered/*.yaml
+          done
+          grep -n "image:" k8s-rendered/*.yaml
+
+      - name: Namespace, llaves RSA y credenciales para descargar de GHCR
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          kubectl apply -f k8s-rendered/00-namespace.yaml
+
+          # Las llaves RSA se crean una sola vez y se conservan entre despliegues
+          if ! kubectl get secret jwt-keys -n "$NAMESPACE" >/dev/null 2>&1; then
+            mkdir -p keys
+            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out keys/private.pem
+            openssl rsa -in keys/private.pem -pubout -out keys/public.pem
+            kubectl create secret generic jwt-keys -n "$NAMESPACE" \
+              --from-file=private.pem=keys/private.pem \
+              --from-file=public.pem=keys/public.pem
+            rm -rf keys
+          fi
+
+          kubectl create secret docker-registry ghcr-pull -n "$NAMESPACE" \
+            --docker-server=ghcr.io \
+            --docker-username="$GHCR_USER" \
+            --docker-password="$GHCR_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Base de datos
+        run: |
+          kubectl apply -f k8s-rendered/01-secrets.yaml -f k8s-rendered/02-postgres.yaml
+          kubectl rollout status deployment/postgres -n "$NAMESPACE" --timeout=180s
+
+      - name: Microservicios y frontend
+        run: |
+          kubectl apply -f k8s-rendered/03-auth-service.yaml -f k8s-rendered/04-task-service.yaml -f k8s-rendered/05-frontend.yaml
+          kubectl rollout status deployment/auth-service -n "$NAMESPACE" --timeout=300s
+          kubectl rollout status deployment/task-service -n "$NAMESPACE" --timeout=300s
+          kubectl rollout status deployment/frontend -n "$NAMESPACE" --timeout=180s
+
+      - name: Estado final
+        run: |
+          kubectl get pods -n "$NAMESPACE"
+          kubectl get svc -n "$NAMESPACE"
+          echo "Página web: http://localhost:30080 (NodePort) o kubectl port-forward -n $NAMESPACE svc/frontend 8080:80"
+
+      - name: Diagnóstico si algo falló
+        if: failure()
+        run: |
+          kubectl get pods -n "$NAMESPACE" || true
+          kubectl describe pods -n "$NAMESPACE" | tail -n 80 || true
+          kubectl logs -n "$NAMESPACE" deployment/auth-service --tail=40 || true
+          kubectl logs -n "$NAMESPACE" deployment/task-service --tail=40 || true

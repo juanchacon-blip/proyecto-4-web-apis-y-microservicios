@@ -1,0 +1,8 @@
+target/
+keys/
+.env
+.idea/
+*.iml
+.vscode/
+.DS_Store
+k8s-rendered/
