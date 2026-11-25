@@ -107,7 +107,9 @@ jobs:
       NAMESPACE: microservicios
     steps:
       - uses: actions/checkout@v4
-
+      - name: Usar Git Bash (no WSL)
+        shell: powershell
+        run: Add-Content -Path $env:GITHUB_PATH -Value "C:\Program Files\Git\bin"
       - name: Verificar acceso al clúster
         run: |
           kubectl version --client
