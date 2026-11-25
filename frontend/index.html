@@ -3,279 +3,1171 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#7c3aed">
-<title>Gestor de tareas</title>
+<meta name="theme-color" content="#090514">
+<title>Aether Tasks · Espacio de Trabajo Violeta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    color-scheme: light dark;
-    --bg: #f6f1ff; --ink: #1f1535; --muted: #6d6288; --line: rgba(124, 58, 237, .16);
-    --card: rgba(255, 255, 255, .74); --field: rgba(255, 255, 255, .92);
-    --p1: #7c3aed; --p-soft: rgba(124, 58, 237, .12);
-    --btn1: #7c3aed; --btn2: #c026d3;
-    --danger: #d6336c; --shadow: 0 18px 50px -18px rgba(88, 28, 135, .35);
-    --blob1: #c4b5fd; --blob2: #f0abfc; --blob3: #a5b4fc;
-    --ease: cubic-bezier(.22, 1, .36, 1);
+    --bg-deep: #06030e;
+    --bg-surface: rgba(18, 11, 36, 0.65);
+    --bg-elevated: rgba(28, 17, 54, 0.78);
+    --bg-input: rgba(10, 6, 22, 0.72);
+    --ink: #f8f5ff;
+    --ink-soft: #cbbbe8;
+    --muted: #8b78b0;
+    --violet: #8b5cf6;
+    --violet-bright: #a78bfa;
+    --orchid: #d946ef;
+    --indigo: #6366f1;
+    --pink: #ec4899;
+    --danger: #fb7185;
+    --line: rgba(167, 139, 250, 0.14);
+    --line-glow: rgba(217, 70, 239, 0.45);
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f0a1d; --ink: #f3ecff; --muted: #a99bcc; --line: rgba(167, 139, 250, .22);
-      --card: rgba(30, 20, 54, .72); --field: rgba(18, 11, 38, .75);
-      --p1: #b69cff; --p-soft: rgba(167, 139, 250, .16);
-      --danger: #fb7185; --shadow: 0 20px 54px -20px rgba(0, 0, 0, .75);
-      --blob1: #5b21b6; --blob2: #86198f; --blob3: #3730a3;
-    }
-  }
+
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--bg-deep);
+    color: var(--ink);
+    font: 15px/1.6 "Inter", system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--orchid); color: #fff; }
+
+  h1, h2, h3, .font-display {
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   }
 
-  /* ---------- fondo animado ---------- */
-  .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; will-change: transform; }
-  .blob.a { width: 46vmax; height: 46vmax; left: -12vmax; top: -14vmax; background: var(--blob1); animation: drift1 22s ease-in-out infinite alternate; }
-  .blob.b { width: 38vmax; height: 38vmax; right: -10vmax; top: 18vh; background: var(--blob2); animation: drift2 26s ease-in-out infinite alternate; }
-  .blob.c { width: 34vmax; height: 34vmax; left: 20vw; bottom: -16vmax; background: var(--blob3); animation: drift3 30s ease-in-out infinite alternate; }
-  @keyframes drift1 { to { transform: translate(14vmax, 10vmax) scale(1.15); } }
-  @keyframes drift2 { to { transform: translate(-12vmax, -8vmax) scale(.9); } }
-  @keyframes drift3 { to { transform: translate(10vmax, -12vmax) scale(1.1); } }
+  /* =========================================================
+     1. ESCENARIO CÓSMICO DE FONDO (AURORA + GRID + ESTRELLAS)
+     ========================================================= */
+  .cosmos {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(124, 58, 237, 0.28), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 90% 80%, rgba(217, 70, 239, 0.16), transparent 65%),
+      #06030e;
+  }
+  .cosmos-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(167, 139, 250, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(167, 139, 250, 0.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 35%, #000 20%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 35%, #000 20%, transparent 95%);
+  }
+  .nebula {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    will-change: transform;
+    mix-blend-mode: screen;
+  }
+  .nebula.n1 {
+    width: 55vmax; height: 55vmax; left: -15vmax; top: -20vmax;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.42), transparent 68%);
+    animation: orbit1 26s ease-in-out infinite alternate;
+  }
+  .nebula.n2 {
+    width: 48vmax; height: 48vmax; right: -12vmax; top: 15vh;
+    background: radial-gradient(circle, rgba(217, 70, 239, 0.32), transparent 68%);
+    animation: orbit2 32s ease-in-out infinite alternate;
+  }
+  .nebula.n3 {
+    width: 46vmax; height: 46vmax; left: 25vw; bottom: -22vmax;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.34), transparent 68%);
+    animation: orbit3 28s ease-in-out infinite alternate;
+  }
+  @keyframes orbit1 { to { transform: translate(16vmax, 12vmax) scale(1.15); } }
+  @keyframes orbit2 { to { transform: translate(-14vmax, -10vmax) scale(0.9); } }
+  @keyframes orbit3 { to { transform: translate(10vmax, -16vmax) scale(1.1); } }
 
-  .wrap { max-width: 680px; margin: 0 auto; padding: 28px 16px 72px; }
+  /* =========================================================
+     2. BARRA SUPERIOR FLOTANTE
+     ========================================================= */
+  .shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px 22px 90px;
+  }
 
-  /* ---------- encabezado ---------- */
-  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; animation: fadeDown .7s var(--ease) both; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .logo {
-    width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
-    background: linear-gradient(135deg, var(--btn1), var(--btn2)); box-shadow: 0 8px 22px -8px var(--btn1);
-    animation: pop .8s var(--ease) both .1s;
+  header.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 18px;
+    margin-bottom: 32px;
+    border-radius: 22px;
+    background: rgba(18, 11, 36, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    animation: slideDown 0.8s var(--ease) both;
   }
-  .logo svg { width: 22px; height: 22px; stroke: #fff; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  h1 { font-size: 1.35rem; margin: 0; letter-spacing: -.02em; }
-  .tag { font-size: .8rem; color: var(--muted); margin: 0; }
-  .userbox { display: flex; align-items: center; gap: 10px; }
-  .avatar {
-    width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff;
-    background: linear-gradient(135deg, var(--btn1), var(--btn2)); text-transform: uppercase;
-  }
-  .who { font-size: .85rem; line-height: 1.2; }
-  .who small { display: block; color: var(--muted); }
 
-  /* ---------- tarjetas ---------- */
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px;
-    margin-bottom: 18px; box-shadow: var(--shadow);
-    -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%);
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
-  .view { animation: viewIn .65s var(--ease) both; }
-  .view .card:nth-child(2) { animation-delay: .08s; }
-  h2 { font-size: 1.1rem; margin: 0 0 4px; letter-spacing: -.01em; }
-  .sub { margin: 0 0 16px; color: var(--muted); font-size: .92rem; }
+  .brand-gem {
+    position: relative;
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #7c3aed 0%, #c026d3 55%, #ec4899 100%);
+    box-shadow:
+      0 0 28px rgba(192, 38, 211, 0.55),
+      inset 0 1px 1px rgba(255, 255, 255, 0.55);
+    transition: transform 0.45s var(--spring);
+  }
+  .brand:hover .brand-gem {
+    transform: rotate(-8deg) scale(1.08);
+  }
+  .brand-gem svg {
+    width: 22px; height: 22px;
+    stroke: #fff; stroke-width: 2.8; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .brand-name {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(120deg, #ffffff 25%, #e9d5ff 65%, #f0abfc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .brand-sub {
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
 
-  /* ---------- formularios ---------- */
-  label.lbl { display: block; font-size: .82rem; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
-  .field { position: relative; }
-  input[type=text], input[type=password], textarea {
-    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
-    background: var(--field); color: inherit; font: inherit;
-    transition: border-color .25s, box-shadow .25s, transform .25s var(--ease);
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 7px 5px 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(167, 139, 250, 0.2);
   }
-  textarea { resize: vertical; min-height: 72px; }
-  input:focus, textarea:focus { outline: none; border-color: var(--p1); box-shadow: 0 0 0 4px var(--p-soft); }
-  .field .peek {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 4px 10px;
-    font-size: .78rem; border-radius: 8px; border: 0; background: var(--p-soft); color: var(--p1);
+  .avatar-ring {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--violet), var(--orchid));
+    box-shadow: 0 0 16px rgba(217, 70, 239, 0.45);
   }
+  .avatar-inner {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: #140b2b;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #f5d0fe;
+    text-transform: uppercase;
+  }
+  .user-meta {
+    line-height: 1.2;
+  }
+  .user-meta strong {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .user-meta span {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--violet-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* =========================================================
+     3. TARJETAS CON SPOTLIGHT INTERACTIVO (MOUSE GLOW)
+     ========================================================= */
+  .glass-panel {
+    position: relative;
+    border-radius: 26px;
+    background: var(--bg-surface);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 28px 70px -20px rgba(0, 0, 0, 0.85),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(26px) saturate(165%);
+    -webkit-backdrop-filter: blur(26px) saturate(165%);
+    overflow: hidden;
+  }
+  .glass-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      500px circle at var(--mx, 50%) var(--my, 0%),
+      rgba(192, 132, 252, 0.14),
+      transparent 45%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .glass-panel:hover::before {
+    opacity: 1;
+  }
+
+  /* =========================================================
+     4. VISTA DE AUTENTICACIÓN ESCÉNICA (SPLIT HERO)
+     ========================================================= */
+  .auth-stage {
+    display: grid;
+    grid-template-columns: 1.15fr 0.95fr;
+    gap: 28px;
+    align-items: stretch;
+    max-width: 980px;
+    margin: 24px auto 0;
+    animation: viewReveal 0.8s var(--ease) both;
+  }
+
+  .auth-showcase {
+    position: relative;
+    padding: 42px 38px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background:
+      radial-gradient(circle at 85% 15%, rgba(217, 70, 239, 0.25), transparent 55%),
+      radial-gradient(circle at 15% 85%, rgba(99, 102, 241, 0.25), transparent 55%),
+      rgba(20, 12, 42, 0.72);
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #f0abfc;
+    background: rgba(217, 70, 239, 0.14);
+    border: 1px solid rgba(217, 70, 239, 0.32);
+    box-shadow: 0 0 24px rgba(217, 70, 239, 0.2);
+  }
+  .eyebrow-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #e879f9;
+    box-shadow: 0 0 10px #e879f9;
+    animation: pulseDot 2s infinite;
+  }
+  @keyframes pulseDot { 50% { transform: scale(1.4); opacity: 0.6; } }
+
+  .hero-headline {
+    font-size: 2.35rem;
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    margin: 20px 0 14px;
+    background: linear-gradient(135deg, #ffffff 20%, #ddd6fe 60%, #f5d0fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-copy {
+    color: var(--ink-soft);
+    font-size: 0.96rem;
+    margin: 0 0 28px;
+    max-width: 40ch;
+  }
+
+  /* Mini vista previa decorativa flotante */
+  .mock-stack {
+    display: grid;
+    gap: 10px;
+    margin-top: auto;
+  }
+  .mock-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    transform: translateY(0);
+    transition: transform 0.35s var(--spring);
+  }
+  .mock-card:hover { transform: translateX(6px); border-color: rgba(217, 70, 239, 0.35); }
+  .mock-check {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--violet), var(--orchid));
+    flex: none;
+  }
+  .mock-check.pending {
+    background: transparent;
+    border: 2px solid rgba(167, 139, 250, 0.45);
+  }
+  .mock-lines { flex: 1; }
+  .mock-lines div:first-child { font-size: 0.84rem; font-weight: 600; color: #f3e8ff; }
+  .mock-lines div:last-child { font-size: 0.74rem; color: var(--muted); }
+  .mock-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: rgba(139, 92, 246, 0.2);
+    color: #c4b5fd;
+  }
+
+  .auth-box {
+    padding: 36px 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Pestañas con píldora deslizante */
+  .segmented {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 5px;
+    margin-bottom: 24px;
+    border-radius: 15px;
+    background: rgba(8, 5, 18, 0.75);
+    border: 1px solid var(--line);
+  }
+  .segmented .slider {
+    position: absolute;
+    top: 5px; bottom: 5px; left: 5px;
+    width: calc(50% - 5px);
+    border-radius: 11px;
+    background: linear-gradient(135deg, #7c3aed, #c026d3);
+    box-shadow: 0 8px 22px -6px rgba(192, 38, 211, 0.75);
+    transition: transform 0.5s var(--spring);
+  }
+  .segmented[data-mode="register"] .slider { transform: translateX(100%); }
+  .segmented button {
+    position: relative;
+    z-index: 1;
+    border: 0;
+    background: transparent;
+    padding: 10px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .segmented button[aria-selected="true"] { color: #fff; }
+
+  /* =========================================================
+     5. INPUTS & BOTONES PREMIUM
+     ========================================================= */
+  .field-group { margin-bottom: 16px; }
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+  }
+  .input-wrap { position: relative; }
+  input[type="text"], input[type="password"], input[type="search"], textarea {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    background: var(--bg-input);
+    color: var(--ink);
+    font: inherit;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(167, 139, 250, 0.42); }
+  input:hover, textarea:hover {
+    border-color: rgba(192, 132, 252, 0.4);
+    background: rgba(15, 9, 32, 0.88);
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--orchid);
+    background: rgba(18, 11, 38, 0.95);
+    box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.16), 0 10px 26px -10px rgba(139, 92, 246, 0.55);
+  }
+  textarea { resize: vertical; min-height: 86px; }
+
+  .peek-btn {
+    position: absolute;
+    right: 9px; top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 11px;
+    border-radius: 9px;
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    background: rgba(139, 92, 246, 0.14);
+    color: #e9d5ff;
+    font-size: 0.76rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .peek-btn:hover { background: rgba(139, 92, 246, 0.28); }
+
   button { font: inherit; cursor: pointer; color: inherit; }
-  button:focus-visible { outline: 2px solid var(--p1); outline-offset: 2px; }
+
   .btn {
-    border: 1px solid var(--line); background: var(--field); border-radius: 12px; padding: 10px 16px;
-    transition: transform .25s var(--ease), box-shadow .25s, background .25s, opacity .2s;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid rgba(167, 139, 250, 0.22);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ink);
+    transition: transform 0.28s var(--spring), box-shadow 0.28s, border-color 0.28s, background 0.28s;
   }
-  .btn:hover { transform: translateY(-1px); }
-  .btn:active { transform: translateY(1px) scale(.98); }
-  .btn.primary {
-    border: 0; color: #fff; font-weight: 600;
-    background: linear-gradient(135deg, var(--btn1), var(--btn2)); background-size: 140% 140%; background-position: 0 50%;
-    box-shadow: 0 10px 24px -10px var(--btn1);
-    transition: transform .25s var(--ease), box-shadow .25s, background-position .6s var(--ease), opacity .2s;
+  .btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(217, 70, 239, 0.45);
   }
-  .btn.primary:hover { background-position: 100% 50%; box-shadow: 0 14px 28px -10px var(--btn2); }
-  .btn.small { padding: 6px 12px; font-size: .85rem; border-radius: 10px; }
-  .btn.danger { color: var(--danger); }
-  .btn[disabled] { opacity: .6; pointer-events: none; }
-  .btn.wide { width: 100%; padding: 13px 16px; margin-top: 18px; }
-  .spin { display: none; width: 14px; height: 14px; margin-left: 8px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; vertical-align: -2px; animation: spin .7s linear infinite; }
+  .btn:active { transform: translateY(0) scale(0.97); }
+
+  .btn-glow {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 48%, #d946ef 100%);
+    background-size: 200% auto;
+    box-shadow:
+      0 12px 30px -8px rgba(192, 38, 211, 0.65),
+      inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  }
+  .btn-glow::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -120%;
+    width: 65%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-22deg);
+    transition: left 0.7s ease;
+  }
+  .btn-glow:hover {
+    background-position: right center;
+    box-shadow:
+      0 16px 38px -8px rgba(217, 70, 239, 0.8),
+      inset 0 1px 1px rgba(255, 255, 255, 0.55);
+  }
+  .btn-glow:hover::after { left: 160%; }
+
+  .btn-sm { padding: 7px 13px; font-size: 0.8rem; border-radius: 11px; }
+  .btn-block { width: 100%; padding: 14px 20px; font-size: 0.96rem; }
+  .btn[disabled] { opacity: 0.5; pointer-events: none; }
+
+  .spin {
+    display: none;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    animation: spin 0.7s linear infinite;
+  }
   .btn.loading .spin { display: inline-block; }
 
-  /* ---------- pestañas con indicador deslizante ---------- */
-  .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin-bottom: 18px; background: var(--p-soft); border-radius: 14px; }
-  .tabs .pill {
-    position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 10px;
-    background: linear-gradient(135deg, var(--btn1), var(--btn2)); box-shadow: 0 6px 16px -6px var(--btn1);
-    transition: transform .5s var(--ease);
+  /* =========================================================
+     6. WORKSPACE BENTO GRID (2 COLUMNAS EN ESCRITORIO)
+     ========================================================= */
+  .workspace {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
+    animation: viewReveal 0.75s var(--ease) both;
   }
-  .tabs[data-mode=register] .pill { transform: translateX(100%); }
-  .tabs button { position: relative; z-index: 1; border: 0; background: transparent; padding: 9px 8px; border-radius: 10px; font-weight: 600; color: var(--muted); transition: color .3s; }
-  .tabs button[aria-selected=true] { color: #fff; }
-  .swap { animation: textIn .45s var(--ease) both; }
 
-  .msg { margin: 12px 0 0; font-size: .9rem; min-height: 1.3em; color: var(--danger); }
-  .msg.shake { animation: shake .45s; }
-  .hint { color: var(--muted); font-size: .8rem; margin: 8px 0 0; min-height: 1.2em; }
-
-  /* ---------- progreso y filtros ---------- */
-  .listhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .progress-label { color: var(--muted); font-size: .85rem; }
-  .bar { height: 9px; border-radius: 99px; background: var(--p-soft); overflow: hidden; margin: 10px 0 16px; }
-  .bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--btn1), var(--btn2)); transition: width .8s var(--ease); }
-  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .chip { border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 5px 14px; font-size: .85rem; color: var(--muted); transition: all .3s var(--ease); }
-  .chip:hover { transform: translateY(-1px); color: var(--ink); }
-  .chip[aria-pressed=true] { background: linear-gradient(135deg, var(--btn1), var(--btn2)); border-color: transparent; color: #fff; box-shadow: 0 6px 16px -8px var(--btn1); }
-
-  /* ---------- lista de tareas ---------- */
-  ul { list-style: none; margin: 0; padding: 0; }
-  li.task {
-    display: flex; gap: 14px; align-items: flex-start; padding: 14px; margin-bottom: 10px; border-radius: 16px;
-    background: var(--field); border: 1px solid var(--line);
-    transition: transform .3s var(--ease), box-shadow .3s, border-color .3s;
+  .sidebar-col {
+    position: sticky;
+    top: 24px;
+    display: grid;
+    gap: 20px;
   }
-  li.task:hover { transform: translateY(-2px); border-color: var(--p1); box-shadow: 0 12px 26px -16px var(--btn1); }
-  li.task.enter { animation: taskIn .6s var(--ease) both; }
-  li.task.leaving { animation: taskOut .32s ease forwards; }
-  li.task .body { flex: 1; min-width: 0; }
-  li.task .title { font-weight: 600; overflow-wrap: anywhere; transition: color .3s; }
-  li.task.done .title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--p1); }
-  li.task .desc { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; white-space: pre-wrap; }
-  li.task .meta { color: var(--muted); font-size: .75rem; margin-top: 4px; }
-  .badge { display: inline-block; font-size: .7rem; padding: 1px 9px; border-radius: 99px; background: var(--p-soft); color: var(--p1); margin-left: 6px; vertical-align: 2px; font-weight: 600; }
-  .actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-  .edit { display: grid; gap: 8px; }
 
-  .check { position: relative; width: 24px; height: 24px; flex: none; margin-top: 1px; }
-  .check input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
-  .box { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--p1); transition: all .3s var(--ease); }
-  .box svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 22; stroke-dashoffset: 22; transition: stroke-dashoffset .4s var(--ease) .05s; }
-  .check input:checked + .box { background: linear-gradient(135deg, var(--btn1), var(--btn2)); border-color: transparent; transform: scale(1.08); }
-  .check input:checked + .box svg { stroke-dashoffset: 0; }
-  .check input:focus-visible + .box { outline: 2px solid var(--p1); outline-offset: 3px; }
+  .composer-card { padding: 24px; }
+  .composer-card h2 {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .composer-card p {
+    margin: 0 0 18px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
 
-  .empty { text-align: center; padding: 26px 8px 10px; color: var(--muted); animation: fadeUp .6s var(--ease) both; }
-  .empty svg { width: 84px; height: 84px; margin-bottom: 8px; animation: float 4s ease-in-out infinite; }
+  /* Tarjeta de Métricas Rápidas Bento */
+  .bento-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 16px;
+  }
+  .stat-tile {
+    padding: 12px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
+    transition: transform 0.3s var(--spring), border-color 0.3s;
+  }
+  .stat-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(192, 132, 252, 0.35);
+  }
+  .stat-val {
+    display: block;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, #d8b4fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-tile.accent .stat-val {
+    background: linear-gradient(135deg, #f0abfc, #e879f9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-lbl {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 500;
+  }
 
-  /* ---------- avisos ---------- */
-  .toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); display: grid; gap: 8px; z-index: 20; width: min(92vw, 360px); }
-  .toast { padding: 12px 16px; border-radius: 14px; color: #fff; background: #2b1a52; box-shadow: 0 14px 30px -12px rgba(0,0,0,.5); animation: toastIn .5s var(--ease) both; font-size: .92rem; }
-  .toast.error { background: #9f1a4a; }
-  .toast.out { animation: toastOut .35s ease forwards; }
+  /* =========================================================
+     7. PANEL PRINCIPAL DE TAREAS & ANILLO RADIAL SVG
+     ========================================================= */
+  .board-card { padding: 26px 28px; }
 
+  .board-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 22px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .board-title-wrap h2 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .board-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  /* Anillo Radial de Progreso */
+  .ring-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    border-radius: 18px;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(167, 139, 250, 0.22);
+  }
+  .ring-svg {
+    width: 48px; height: 48px;
+    transform: rotate(-90deg);
+  }
+  .ring-track {
+    fill: none;
+    stroke: rgba(167, 139, 250, 0.16);
+    stroke-width: 4.5;
+  }
+  .ring-fill {
+    fill: none;
+    stroke: url(#ringGrad);
+    stroke-width: 4.5;
+    stroke-linecap: round;
+    stroke-dasharray: 125.66;
+    stroke-dashoffset: 125.66;
+    transition: stroke-dashoffset 0.9s var(--ease);
+    filter: drop-shadow(0 0 6px rgba(217, 70, 239, 0.65));
+  }
+  .ring-info strong {
+    display: block;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #fff;
+  }
+  .ring-info span {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+  }
+
+  /* Controles de Filtro y Búsqueda */
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-pills {
+    display: inline-flex;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 14px;
+    background: rgba(8, 5, 18, 0.65);
+    border: 1px solid var(--line);
+  }
+  .filter-btn {
+    border: 0;
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.25s var(--ease);
+  }
+  .filter-btn:hover { color: var(--ink); }
+  .filter-btn[aria-pressed="true"] {
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #c026d3);
+    box-shadow: 0 6px 16px -4px rgba(192, 38, 211, 0.65);
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1 1 200px;
+    max-width: 260px;
+  }
+  .search-box svg {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    width: 15px; height: 15px;
+    stroke: var(--muted);
+    pointer-events: none;
+  }
+  .search-box input {
+    padding: 9px 14px 9px 36px;
+    font-size: 0.84rem;
+    border-radius: 13px;
+  }
+
+  /* =========================================================
+     8. TARJETAS DE TAREA INDIVIDUALES
+     ========================================================= */
+  ul.task-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  li.task-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 18px 18px 18px 20px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(30, 19, 58, 0.72), rgba(18, 11, 36, 0.82));
+    border: 1px solid rgba(167, 139, 250, 0.16);
+    box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.75);
+    transition: transform 0.32s var(--spring), border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  /* Barra de acento lateral luminosa */
+  li.task-item::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 16px; bottom: 16px;
+    width: 3.5px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(180deg, var(--violet), var(--orchid));
+    opacity: 0.85;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  li.task-item:hover {
+    transform: translateY(-3px) scale(1.005);
+    border-color: rgba(217, 70, 239, 0.45);
+    box-shadow: 0 18px 36px -14px rgba(124, 58, 237, 0.45);
+  }
+  li.task-item.done {
+    background: rgba(14, 9, 28, 0.55);
+    border-color: rgba(167, 139, 250, 0.08);
+  }
+  li.task-item.done::before {
+    background: rgba(139, 92, 246, 0.25);
+  }
+  li.task-item.enter { animation: cardEnter 0.55s var(--ease) both; }
+  li.task-item.leaving { animation: cardLeave 0.35s var(--ease) forwards; }
+
+  /* Checkbox neón */
+  .chk-wrap {
+    position: relative;
+    width: 25px; height: 25px;
+    flex: none;
+    margin-top: 2px;
+  }
+  .chk-wrap input {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .chk-box {
+    width: 25px; height: 25px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(192, 132, 252, 0.45);
+    background: rgba(10, 6, 22, 0.7);
+    transition: all 0.35s var(--spring);
+  }
+  .chk-wrap:hover .chk-box {
+    border-color: var(--orchid);
+    box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.16);
+  }
+  .chk-box svg {
+    width: 14px; height: 14px;
+    stroke: #fff;
+    stroke-width: 3.2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 22;
+    stroke-dashoffset: 22;
+    transition: stroke-dashoffset 0.38s var(--ease) 0.06s;
+  }
+  .chk-wrap input:checked + .chk-box {
+    border-color: transparent;
+    background: linear-gradient(135deg, #7c3aed, #d946ef);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.7);
+  }
+  .chk-wrap input:checked + .chk-box svg { stroke-dashoffset: 0; }
+
+  .task-content { flex: 1; min-width: 0; }
+  .task-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+    transition: color 0.3s;
+  }
+  li.task-item.done .task-title {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--orchid);
+    text-decoration-thickness: 1.5px;
+  }
+  .task-desc {
+    margin-top: 5px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    opacity: 0.85;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  li.task-item.done .task-desc { opacity: 0.5; }
+
+  .task-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.73rem;
+    color: var(--muted);
+    padding: 3px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+  }
+  .owner-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 99px;
+    color: #f5d0fe;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(217, 70, 239, 0.3));
+    border: 1px solid rgba(217, 70, 239, 0.35);
+  }
+
+  .task-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0.7;
+    transition: opacity 0.25s;
+  }
+  li.task-item:hover .task-actions { opacity: 1; }
+  .act-btn {
+    width: 34px; height: 34px;
+    border-radius: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+    display: grid;
+    place-items: center;
+    color: var(--ink-soft);
+    transition: all 0.25s var(--spring);
+  }
+  .act-btn svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
+  .act-btn:hover {
+    transform: scale(1.1);
+    color: #fff;
+    background: rgba(139, 92, 246, 0.25);
+    border-color: rgba(167, 139, 250, 0.45);
+  }
+  .act-btn.del:hover {
+    color: #fda4af;
+    background: rgba(244, 63, 94, 0.22);
+    border-color: rgba(251, 113, 133, 0.45);
+  }
+
+  .edit-form { display: grid; gap: 10px; width: 100%; }
+
+  /* Estado vacío ilustrado */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px 28px;
+    animation: viewReveal 0.6s var(--ease) both;
+  }
+  .empty-orb {
+    width: 84px; height: 84px;
+    margin: 0 auto 16px;
+    border-radius: 28px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(217, 70, 239, 0.22));
+    border: 1px solid rgba(217, 70, 239, 0.35);
+    box-shadow: 0 20px 40px -12px rgba(192, 38, 211, 0.45);
+    animation: floatOrb 4.5s ease-in-out infinite;
+  }
+  @keyframes floatOrb { 50% { transform: translateY(-8px) rotate(3deg); } }
+  .empty-state h3 { margin: 0 0 6px; font-size: 1.1rem; color: #fff; }
+  .empty-state p { margin: 0; font-size: 0.88rem; color: var(--muted); }
+
+  /* Partículas de celebración */
+  .spark {
+    position: fixed;
+    width: 7px; height: 7px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+    animation: sparkBurst 0.7s var(--ease) forwards;
+  }
+  @keyframes sparkBurst {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(180deg) scale(0); }
+  }
+
+  /* Toasts flotantes */
+  .toasts {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    display: grid;
+    gap: 10px;
+    z-index: 50;
+    width: min(90vw, 350px);
+  }
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #fff;
+    background: rgba(26, 15, 52, 0.92);
+    border: 1px solid rgba(217, 70, 239, 0.4);
+    box-shadow: 0 20px 44px -12px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(16px);
+    animation: toastIn 0.5s var(--spring) both;
+  }
+  .toast.error {
+    background: rgba(76, 13, 36, 0.94);
+    border-color: rgba(251, 113, 133, 0.5);
+  }
+  .toast.out { animation: toastOut 0.35s var(--ease) forwards; }
+
+  .msg { margin: 14px 0 0; font-size: 0.86rem; color: var(--danger); text-align: center; min-height: 1.3em; }
+  .msg.shake { animation: shake 0.45s; }
+  .hint { font-size: 0.78rem; color: var(--muted); margin: 6px 0 14px; min-height: 1.1em; }
   .hidden { display: none !important; }
 
-  @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-  @keyframes viewIn { from { opacity: 0; transform: translateY(22px) scale(.985); } to { opacity: 1; transform: none; } }
-  @keyframes textIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  @keyframes pop { from { opacity: 0; transform: scale(.5) rotate(-12deg); } to { opacity: 1; transform: none; } }
-  @keyframes taskIn { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
-  @keyframes taskOut { to { opacity: 0; transform: translateX(36px) scale(.95); } }
-  @keyframes toastIn { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
-  @keyframes toastOut { to { opacity: 0; transform: translateY(10px); } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: none; } }
+  @keyframes viewReveal { from { opacity: 0; transform: translateY(22px) scale(0.985); } to { opacity: 1; transform: none; } }
+  @keyframes cardEnter { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @keyframes cardLeave { to { opacity: 0; transform: translateX(36px) scale(0.95); } }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.92); } to { opacity: 1; transform: none; } }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(10px) scale(0.95); } }
   @keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes float { 50% { transform: translateY(-8px); } }
 
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  @media (max-width: 880px) {
+    .auth-stage { grid-template-columns: 1fr; max-width: 480px; }
+    .auth-showcase { display: none; }
+    .workspace { grid-template-columns: 1fr; }
+    .sidebar-col { position: static; }
   }
-  @media (max-width: 480px) {
-    .card { padding: 18px; border-radius: 18px; }
-    li.task { flex-wrap: wrap; }
-    .actions { width: 100%; justify-content: flex-start; padding-left: 38px; }
-    .who { display: none; }
+  @media (max-width: 520px) {
+    .shell { padding: 16px 14px 72px; }
+    .user-meta { display: none; }
+    .board-card, .composer-card { padding: 20px; }
+    .search-box { max-width: 100%; flex-basis: 100%; }
   }
 </style>
 </head>
 <body>
-<div class="bg" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
 
-<div class="wrap">
-  <header>
+<div class="cosmos" aria-hidden="true">
+  <div class="nebula n1"></div>
+  <div class="nebula n2"></div>
+  <div class="nebula n3"></div>
+  <div class="cosmos-grid"></div>
+</div>
+
+<div class="shell">
+  <!-- Barra superior -->
+  <header class="topbar">
     <div class="brand">
-      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <div class="brand-gem" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
       <div>
-        <h1>Gestor de tareas</h1>
-        <p class="tag">Organiza tu día con calma</p>
+        <h1 class="brand-name">Aether Tasks</h1>
+        <p class="brand-sub">Espacio de productividad violeta</p>
       </div>
     </div>
-    <div id="userbox" class="userbox hidden">
-      <div class="avatar" id="avatar" aria-hidden="true"></div>
-      <div class="who"><span id="whoami"></span><small id="role"></small></div>
-      <button id="logout" class="btn small" type="button">Salir</button>
+
+    <div id="userbox" class="user-pill hidden">
+      <div class="avatar-ring">
+        <div class="avatar-inner" id="avatar"></div>
+      </div>
+      <div class="user-meta">
+        <strong id="whoami"></strong>
+        <span id="role"></span>
+      </div>
+      <button id="logout" class="btn btn-sm" type="button">Salir</button>
     </div>
   </header>
 
-  <!-- Acceso -->
-  <section id="auth-view" class="view">
-    <div class="card">
-      <div class="tabs" id="tabs" data-mode="login" role="tablist">
-        <span class="pill" aria-hidden="true"></span>
+  <!-- =========================================================
+       VISTA 1: ACCESO ESCÉNICO SPLIT-SCREEN
+       ========================================================= -->
+  <section id="auth-view" class="auth-stage">
+    <div class="glass-panel auth-showcase" data-spotlight>
+      <div>
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          <span>Flujo de trabajo sincronizado</span>
+        </div>
+        <h2 class="hero-headline">Organiza tus ideas con claridad absoluta.</h2>
+        <p class="hero-copy">
+          Un espacio diseñado para mantener el foco en lo importante, con seguimiento visual en tiempo real y cero fricción.
+        </p>
+      </div>
+
+      <div class="mock-stack" aria-hidden="true">
+        <div class="mock-card">
+          <div class="mock-check">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </div>
+          <div class="mock-lines">
+            <div>Desplegar arquitectura en contenedores</div>
+            <div>Completada · Hoy</div>
+          </div>
+          <span class="mock-tag">Listo</span>
+        </div>
+        <div class="mock-card">
+          <div class="mock-check pending"></div>
+          <div class="mock-lines">
+            <div>Revisar métricas y endpoints activos</div>
+            <div>En progreso · Prioridad alta</div>
+          </div>
+          <span class="mock-tag">Hoy</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel auth-box" data-spotlight>
+      <div class="segmented" id="tabs" data-mode="login" role="tablist">
+        <span class="slider" aria-hidden="true"></span>
         <button id="tab-login" type="button" role="tab" aria-selected="true">Iniciar sesión</button>
         <button id="tab-register" type="button" role="tab" aria-selected="false">Crear cuenta</button>
       </div>
-      <h2 id="auth-title" class="swap">Bienvenido de nuevo</h2>
-      <p id="auth-sub" class="sub swap">Entra para ver y gestionar tus tareas.</p>
+
+      <h2 id="auth-title" style="margin:0 0 4px;font-size:1.35rem;font-weight:800;">Bienvenido de nuevo</h2>
+      <p id="auth-sub" style="margin:0 0 22px;color:var(--muted);font-size:0.88rem;">Ingresa tus credenciales para continuar.</p>
+
       <form id="auth-form" autocomplete="on">
-        <label class="lbl" for="username">Usuario</label>
-        <input id="username" type="text" autocomplete="username" required minlength="3" maxlength="50">
-        <label class="lbl" for="password">Contraseña</label>
-        <div class="field">
-          <input id="password" type="password" autocomplete="current-password" required minlength="8" maxlength="100">
-          <button id="peek" class="peek" type="button" aria-label="Mostrar u ocultar contraseña">Mostrar</button>
+        <div class="field-group">
+          <label class="field-label" for="username">Usuario</label>
+          <input id="username" type="text" autocomplete="username" placeholder="nombre_usuario" required minlength="3" maxlength="50">
         </div>
+
+        <div class="field-group">
+          <label class="field-label" for="password">Contraseña</label>
+          <div class="input-wrap">
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" maxlength="100">
+            <button id="peek" class="peek-btn" type="button">Mostrar</button>
+          </div>
+        </div>
+
         <p class="hint" id="auth-hint"></p>
-        <button id="auth-submit" type="submit" class="btn primary wide"><span id="auth-submit-text">Entrar</span><span class="spin"></span></button>
+
+        <button id="auth-submit" type="submit" class="btn btn-glow btn-block">
+          <span id="auth-submit-text">Entrar al espacio</span>
+          <span class="spin"></span>
+        </button>
         <p id="auth-msg" class="msg" role="status" aria-live="polite"></p>
       </form>
     </div>
   </section>
 
-  <!-- Tareas -->
-  <section id="tasks-view" class="view hidden">
-    <form id="new-task" class="card">
-      <h2>Nueva tarea</h2>
-      <p class="sub">Anota lo que tienes pendiente.</p>
-      <label class="lbl" for="new-title">Título</label>
-      <input id="new-title" type="text" required maxlength="120" placeholder="Ej. Entregar el proyecto">
-      <label class="lbl" for="new-desc">Descripción (opcional)</label>
-      <textarea id="new-desc" maxlength="1000" placeholder="Detalles, enlaces, notas…"></textarea>
-      <button id="add-btn" type="submit" class="btn primary" style="margin-top:16px"><span>Agregar tarea</span><span class="spin"></span></button>
-    </form>
+  <!-- =========================================================
+       VISTA 2: WORKSPACE BENTO (2 COLUMNAS)
+       ========================================================= -->
+  <section id="tasks-view" class="workspace hidden">
+    <!-- Columna Izquierda: Compositor + Métricas -->
+    <aside class="sidebar-col">
+      <div class="glass-panel bento-stats" data-spotlight>
+        <div class="stat-tile">
+          <span class="stat-val" id="stat-total">0</span>
+          <span class="stat-lbl">Total</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-val" id="stat-pending">0</span>
+          <span class="stat-lbl">Pendientes</span>
+        </div>
+        <div class="stat-tile accent">
+          <span class="stat-val" id="stat-done">0</span>
+          <span class="stat-lbl">Listas</span>
+        </div>
+      </div>
 
-    <div class="card">
-      <div class="listhead">
-        <h2 id="list-title">Mis tareas</h2>
-        <span id="progress-label" class="progress-label"></span>
+      <form id="new-task" class="glass-panel composer-card" data-spotlight>
+        <h2>Nueva tarea</h2>
+        <p>Añade un objetivo a tu tablero.</p>
+
+        <div class="field-group">
+          <label class="field-label" for="new-title">Título</label>
+          <input id="new-title" type="text" required maxlength="120" placeholder="Ej. Optimizar consultas API">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="new-desc">Notas <span style="font-weight:400;color:var(--muted)">Opcional</span></label>
+          <textarea id="new-desc" maxlength="1000" placeholder="Contexto, enlaces o pasos clave…"></textarea>
+        </div>
+
+        <button id="add-btn" type="submit" class="btn btn-glow btn-block">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Crear tarea</span>
+          <span class="spin"></span>
+        </button>
+      </form>
+    </aside>
+
+    <!-- Columna Derecha: Tablero Principal -->
+    <main class="glass-panel board-card" data-spotlight>
+      <div class="board-hero">
+        <div class="board-title-wrap">
+          <h2 id="list-title">Mis tareas</h2>
+          <p class="board-subtitle" id="board-date">Gestiona tus pendientes del día</p>
+        </div>
+
+        <div class="ring-box">
+          <svg class="ring-svg" viewBox="0 0 48 48">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8b5cf6"/>
+                <stop offset="100%" stop-color="#e879f9"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="24" cy="24" r="20"/>
+            <circle class="ring-fill" id="ring-fill" cx="24" cy="24" r="20"/>
+          </svg>
+          <div class="ring-info">
+            <strong id="ring-pct">0%</strong>
+            <span id="progress-label">0 de 0 listas</span>
+          </div>
+        </div>
       </div>
-      <div class="bar" aria-hidden="true"><i id="progress-bar"></i></div>
-      <div class="filters" role="group" aria-label="Filtrar tareas">
-        <button class="chip" type="button" data-filter="all" aria-pressed="true">Todas</button>
-        <button class="chip" type="button" data-filter="pending" aria-pressed="false">Pendientes</button>
-        <button class="chip" type="button" data-filter="done" aria-pressed="false">Completadas</button>
+
+      <div class="controls-bar">
+        <div class="filter-pills" role="group" aria-label="Filtrar tareas">
+          <button class="filter-btn" type="button" data-filter="all" aria-pressed="true">Todas</button>
+          <button class="filter-btn" type="button" data-filter="pending" aria-pressed="false">Pendientes</button>
+          <button class="filter-btn" type="button" data-filter="done" aria-pressed="false">Completadas</button>
+        </div>
+
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="search" type="search" placeholder="Filtrar por texto…" aria-label="Buscar tarea">
+        </div>
       </div>
-      <ul id="list"></ul>
-      <div id="empty" class="empty hidden">
-        <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-          <rect x="16" y="14" width="64" height="72" rx="14" fill="currentColor" opacity=".12"/>
-          <rect x="16" y="14" width="64" height="72" rx="14" stroke="#a855f7" stroke-width="3"/>
-          <path d="M32 40h32M32 54h32M32 68h18" stroke="#a855f7" stroke-width="4" stroke-linecap="round"/>
-        </svg>
-        <div id="empty-text">Todavía no hay tareas.</div>
+
+      <ul id="list" class="task-list"></ul>
+
+      <div id="empty" class="empty-state hidden">
+        <div class="empty-orb" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f0abfc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3L12 3z"/>
+          </svg>
+        </div>
+        <h3 id="empty-title">Todo despejado</h3>
+        <p id="empty-text">Todavía no hay tareas en esta vista.</p>
       </div>
-    </div>
+    </main>
   </section>
 </div>
 
@@ -286,9 +1178,25 @@
   "use strict";
 
   var $ = function (s) { return document.querySelector(s); };
-  var state = { mode: "login", tasks: [], editingId: null, admin: false, filter: "all", seen: {} };
+  var state = { mode: "login", tasks: [], editingId: null, admin: false, filter: "all", query: "", seen: {} };
 
-  // ---------- token (localStorage puede no estar disponible) ----------
+  // Efecto Spotlight interactivo siguiendo el cursor en tarjetas
+  document.addEventListener("pointermove", function (e) {
+    var panels = document.querySelectorAll("[data-spotlight]");
+    for (var i = 0; i < panels.length; i++) {
+      var rect = panels[i].getBoundingClientRect();
+      panels[i].style.setProperty("--mx", (e.clientX - rect.left) + "px");
+      panels[i].style.setProperty("--my", (e.clientY - rect.top) + "px");
+    }
+  });
+
+  // Fecha elegante en encabezado
+  try {
+    var today = new Intl.DateTimeFormat("es-CO", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+    $("#board-date").textContent = today.charAt(0).toUpperCase() + today.slice(1);
+  } catch (e) {}
+
+  // ---------- Token ----------
   function getToken() { try { return localStorage.getItem("token"); } catch (e) { return null; } }
   function setToken(t) {
     try { if (t) localStorage.setItem("token", t); else localStorage.removeItem("token"); } catch (e) {}
@@ -300,7 +1208,7 @@
     } catch (e) { return null; }
   }
 
-  // ---------- API (nginx reenvía a auth-service y task-service) ----------
+  // ---------- API ----------
   function api(path, options) {
     options = options || {};
     var headers = { "Content-Type": "application/json" };
@@ -322,7 +1230,7 @@
       });
   }
 
-  // ---------- utilidades de interfaz ----------
+  // ---------- Helpers UI ----------
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -335,11 +1243,41 @@
     b.addEventListener("click", onClick);
     return b;
   }
+  function iconBtn(svg, title, extraCls, onClick) {
+    var b = el("button", "act-btn" + (extraCls ? " " + extraCls : ""));
+    b.type = "button";
+    b.title = title;
+    b.setAttribute("aria-label", title);
+    b.innerHTML = svg;
+    b.addEventListener("click", onClick);
+    return b;
+  }
   function restart(node, cls) { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }
+
+  function burstConfetti(target) {
+    if (!target) return;
+    var r = target.getBoundingClientRect();
+    var cx = r.left + r.width / 2;
+    var cy = r.top + r.height / 2;
+    var palette = ["#a855f7", "#e879f9", "#f472b6", "#818cf8", "#f5d0fe"];
+    for (var i = 0; i < 12; i++) {
+      var p = document.createElement("span");
+      p.className = "spark";
+      var ang = (Math.PI * 2 * i) / 12 + (Math.random() * 0.4);
+      var dist = 26 + Math.random() * 28;
+      p.style.left = cx + "px";
+      p.style.top = cy + "px";
+      p.style.background = palette[i % palette.length];
+      p.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+      p.style.setProperty("--dy", Math.sin(ang) * dist + "px");
+      document.body.appendChild(p);
+      setTimeout(function (node) { if (node.parentNode) node.parentNode.removeChild(node); }, 720, p);
+    }
+  }
 
   function toast(text, kind) {
     Array.prototype.forEach.call(document.querySelectorAll(".toast"), function (old) {
-      if (old.textContent === text && old.parentNode) old.parentNode.removeChild(old); // sin avisos repetidos
+      if (old.textContent === text && old.parentNode) old.parentNode.removeChild(old);
     });
     var t = el("div", "toast" + (kind === "error" ? " error" : ""), text);
     $("#toasts").appendChild(t);
@@ -366,12 +1304,11 @@
     } catch (e) { return ""; }
   }
 
-  // ---------- vistas ----------
+  // ---------- Navegación ----------
   function showAuth() {
     $("#tasks-view").classList.add("hidden");
     $("#userbox").classList.add("hidden");
     $("#auth-view").classList.remove("hidden");
-    restart($("#auth-view"), "view");
   }
 
   function showTasks() {
@@ -381,12 +1318,11 @@
     var name = claims.sub || "";
     $("#avatar").textContent = name.charAt(0) || "?";
     $("#whoami").textContent = name;
-    $("#role").textContent = state.admin ? "Administrador" : "Usuario";
-    $("#list-title").textContent = state.admin ? "Todas las tareas" : "Mis tareas";
+    $("#role").textContent = state.admin ? "Admin" : "Pro Workspace";
+    $("#list-title").textContent = state.admin ? "Tablero Global" : "Mis tareas";
     $("#auth-view").classList.add("hidden");
     $("#tasks-view").classList.remove("hidden");
     $("#userbox").classList.remove("hidden");
-    restart($("#tasks-view"), "view");
     loadTasks();
   }
 
@@ -395,6 +1331,8 @@
     state.tasks = [];
     state.seen = {};
     state.editingId = null;
+    state.query = "";
+    if ($("#search")) $("#search").value = "";
     showAuth();
     setAuthMsg(message || "");
   }
@@ -406,16 +1344,14 @@
     $("#tab-login").setAttribute("aria-selected", String(login));
     $("#tab-register").setAttribute("aria-selected", String(!login));
     $("#auth-title").textContent = login ? "Bienvenido de nuevo" : "Crea tu cuenta";
-    $("#auth-sub").textContent = login ? "Entra para ver y gestionar tus tareas." : "Solo toma un momento.";
-    restart($("#auth-title"), "swap");
-    restart($("#auth-sub"), "swap");
-    $("#auth-submit-text").textContent = login ? "Entrar" : "Crear cuenta";
+    $("#auth-sub").textContent = login ? "Ingresa tus credenciales para continuar." : "Activa tu espacio personal al instante.";
+    $("#auth-submit-text").textContent = login ? "Entrar al espacio" : "Registrarme";
     $("#password").setAttribute("autocomplete", login ? "current-password" : "new-password");
-    $("#auth-hint").textContent = login ? "" : "Usuario: mínimo 3 caracteres. Contraseña: mínimo 8.";
+    $("#auth-hint").textContent = login ? "" : "Usuario: mínimo 3 caracteres · Contraseña: mínimo 8 caracteres.";
     setAuthMsg("");
   }
 
-  // ---------- autenticación ----------
+  // ---------- Auth Events ----------
   function login(username, password) {
     return api("/api/auth/login", { method: "POST", body: JSON.stringify({ username: username, password: password }) })
       .then(function (data) { setToken(data.access_token); showTasks(); });
@@ -439,17 +1375,15 @@
     setAuthMsg("");
     loading(submit, true);
 
-    var action;
-    if (state.mode === "register") {
-      action = api("/api/auth/register", { method: "POST", body: JSON.stringify({ username: username, password: password }) })
-        .then(function () { return login(username, password); });
-    } else {
-      action = login(username, password);
-    }
+    var action = state.mode === "register"
+      ? api("/api/auth/register", { method: "POST", body: JSON.stringify({ username: username, password: password }) })
+          .then(function () { return login(username, password); })
+      : login(username, password);
+
     action.then(function () { $("#password").value = ""; })
       .catch(function (err) {
         if (err.status === 401) setAuthMsg("Usuario o contraseña incorrectos.");
-        else if (err.status === 409) setAuthMsg("Ese usuario ya existe.");
+        else if (err.status === 409) setAuthMsg("Ese nombre de usuario ya existe.");
         else if (err.status === 400) setAuthMsg("Revisa los datos: usuario mínimo 3 caracteres y contraseña mínimo 8.");
         else setAuthMsg("No se pudo conectar con el servidor.");
       })
@@ -458,7 +1392,7 @@
 
   $("#logout").addEventListener("click", function () { logout(); });
 
-  // ---------- tareas ----------
+  // ---------- Tasks CRUD ----------
   function handleTaskError(err) {
     if (err.status === 401) return logout("Tu sesión expiró. Inicia sesión de nuevo.");
     if (err.status === 404) { toast("La tarea ya no existe.", "error"); return loadTasks(); }
@@ -495,27 +1429,41 @@
       .then(function (created) {
         $("#new-title").value = "";
         $("#new-desc").value = "";
-        state.tasks.push(created);
+        state.tasks.unshift(created);
         if (state.filter === "done") setFilter("all"); else render();
-        toast("Tarea agregada");
+        toast("Tarea añadida al tablero");
       })
       .catch(handleTaskError)
       .then(function () { loading(btn, false); });
   });
 
+  $("#new-desc").addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      $("#new-task").requestSubmit();
+    }
+  });
+
   function setFilter(f) {
     state.filter = f;
-    Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
+    Array.prototype.forEach.call(document.querySelectorAll(".filter-btn"), function (c) {
       c.setAttribute("aria-pressed", String(c.getAttribute("data-filter") === f));
     });
-    state.seen = {}; // al cambiar de filtro, la lista entra de nuevo con animación
+    state.seen = {};
     render();
   }
-  Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
+  Array.prototype.forEach.call(document.querySelectorAll(".filter-btn"), function (c) {
     c.addEventListener("click", function () { setFilter(c.getAttribute("data-filter")); });
   });
 
+  $("#search").addEventListener("input", function () {
+    state.query = this.value.trim().toLowerCase();
+    render();
+  });
+
   var CHECK_SVG = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  var EDIT_SVG = '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  var TRASH_SVG = '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
 
   function render() {
     var list = $("#list");
@@ -523,81 +1471,113 @@
 
     var total = state.tasks.length;
     var done = state.tasks.filter(function (t) { return t.completed; }).length;
-    $("#progress-label").textContent = total ? done + " de " + total + " completadas" : "Sin tareas aún";
-    $("#progress-bar").style.width = total ? Math.round(done * 100 / total) + "%" : "0%";
+    var pending = total - done;
+    var pct = total ? Math.round((done * 100) / total) : 0;
+
+    // Actualizar Bento Stats y Anillo Radial SVG
+    $("#stat-total").textContent = total;
+    $("#stat-pending").textContent = pending;
+    $("#stat-done").textContent = done;
+    $("#ring-pct").textContent = pct + "%";
+    $("#progress-label").textContent = done + " de " + total + " listas";
+
+    var circumference = 125.66;
+    var offset = circumference - (pct / 100) * circumference;
+    $("#ring-fill").style.strokeDashoffset = offset;
 
     var visible = state.tasks.filter(function (t) {
-      return state.filter === "all" || (state.filter === "done" ? t.completed : !t.completed);
+      var matchFilter = state.filter === "all" || (state.filter === "done" ? t.completed : !t.completed);
+      if (!matchFilter) return false;
+      if (!state.query) return true;
+      var hay = (t.title + " " + (t.description || "") + " " + (t.owner || "")).toLowerCase();
+      return hay.indexOf(state.query) !== -1;
     });
 
     var empty = $("#empty");
     empty.classList.toggle("hidden", visible.length > 0);
     if (!visible.length) {
-      $("#empty-text").textContent = !total ? "Todavía no hay tareas. ¡Agrega la primera!"
-        : state.filter === "done" ? "Aún no has completado ninguna." : "No te queda nada pendiente. ¡Bien hecho!";
+      if (state.query) {
+        $("#empty-title").textContent = "Sin resultados";
+        $("#empty-text").textContent = "No hay tareas que coincidan con «" + state.query + "».";
+      } else if (!total) {
+        $("#empty-title").textContent = "Tu tablero está impecable";
+        $("#empty-text").textContent = "Crea tu primera tarea desde el panel izquierdo.";
+      } else if (state.filter === "done") {
+        $("#empty-title").textContent = "Aún sin tareas completadas";
+        $("#empty-text").textContent = "Marca una tarea como lista para celebrar tu avance.";
+      } else {
+        $("#empty-title").textContent = "¡Todo completado!";
+        $("#empty-text").textContent = "No tienes pendientes por ahora.";
+      }
     }
 
     visible.forEach(function (t, i) {
-      var li = el("li", "task" + (t.completed ? " done" : ""));
+      var li = el("li", "task-item" + (t.completed ? " done" : ""));
       if (!state.seen[t.id]) {
         li.classList.add("enter");
-        li.style.animationDelay = Math.min(i, 8) * 55 + "ms";
+        li.style.animationDelay = Math.min(i, 8) * 50 + "ms";
       }
 
       if (state.editingId === t.id) {
-        var form = el("div", "body edit");
+        var form = el("div", "edit-form");
         var title = el("input"); title.type = "text"; title.value = t.title; title.maxLength = 120;
         var desc = el("textarea"); desc.value = t.description || ""; desc.maxLength = 1000;
-        var row = el("div", "actions"); row.style.justifyContent = "flex-start";
-        row.appendChild(button("Guardar", "btn primary small", function () {
+        var row = el("div", "task-footer");
+        row.appendChild(button("Guardar cambios", "btn btn-glow btn-sm", function () {
           if (!title.value.trim()) return;
           updateTask(t, { title: title.value.trim(), description: desc.value.trim() || null })
-            .then(function () { state.editingId = null; render(); toast("Cambios guardados"); })
+            .then(function () { state.editingId = null; render(); toast("Tarea actualizada"); })
             .catch(handleTaskError);
         }));
-        row.appendChild(button("Cancelar", "btn small", function () { state.editingId = null; render(); }));
+        row.appendChild(button("Cancelar", "btn btn-sm", function () { state.editingId = null; render(); }));
         form.appendChild(title); form.appendChild(desc); form.appendChild(row);
         li.appendChild(form);
         setTimeout(function () { title.focus(); }, 30);
       } else {
-        var wrap = el("label", "check");
+        var wrap = el("label", "chk-wrap");
         var check = el("input"); check.type = "checkbox"; check.checked = t.completed;
         check.setAttribute("aria-label", "Marcar como completada");
-        var box = el("span", "box"); box.innerHTML = CHECK_SVG;
+        var box = el("span", "chk-box"); box.innerHTML = CHECK_SVG;
         check.addEventListener("change", function () {
-          updateTask(t, { completed: check.checked }).then(render).catch(handleTaskError);
+          var isChecked = check.checked;
+          if (isChecked) burstConfetti(box);
+          updateTask(t, { completed: isChecked }).then(render).catch(handleTaskError);
         });
         wrap.appendChild(check); wrap.appendChild(box);
 
-        var body = el("div", "body");
-        var head = el("div", "title", t.title);
-        if (state.admin) head.appendChild(el("span", "badge", t.owner));
-        body.appendChild(head);
-        if (t.description) body.appendChild(el("div", "desc", t.description));
-        var when = formatDate(t.createdAt);
-        if (when) body.appendChild(el("div", "meta", "Creada el " + when));
+        var content = el("div", "task-content");
+        content.appendChild(el("div", "task-title", t.title));
+        if (t.description) content.appendChild(el("div", "task-desc", t.description));
 
-        var actions = el("div", "actions");
-        actions.appendChild(button("Editar", "btn small", function () { state.editingId = t.id; render(); }));
-        actions.appendChild(button("Borrar", "btn small danger", function () {
-          if (!confirm("¿Borrar esta tarea?")) return;
+        var footer = el("div", "task-footer");
+        var when = formatDate(t.createdAt);
+        if (when) footer.appendChild(el("span", "meta-tag", "Creada el " + when));
+        if (state.admin && t.owner) footer.appendChild(el("span", "owner-badge", "@" + t.owner));
+        if (footer.childNodes.length) content.appendChild(footer);
+
+        var actions = el("div", "task-actions");
+        actions.appendChild(iconBtn(EDIT_SVG, "Editar tarea", "", function () { state.editingId = t.id; render(); }));
+        actions.appendChild(iconBtn(TRASH_SVG, "Eliminar tarea", "del", function () {
+          if (!confirm("¿Eliminar esta tarea permanentemente?")) return;
           api("/api/tasks/" + t.id, { method: "DELETE" }).then(function () {
             li.classList.remove("enter");
             li.classList.add("leaving");
             state.tasks = state.tasks.filter(function (x) { return x.id !== t.id; });
             setTimeout(render, 330);
-            toast("Tarea borrada");
+            toast("Tarea eliminada");
           }).catch(handleTaskError);
         }));
 
-        li.appendChild(wrap); li.appendChild(body); li.appendChild(actions);
+        li.appendChild(wrap);
+        li.appendChild(content);
+        li.appendChild(actions);
       }
       list.appendChild(li);
       state.seen[t.id] = true;
     });
   }
 
-  // ---------- arranque ----------
+  // ---------- Arranque ----------
   setMode("login");
   var existing = getToken();
   var claims = existing && decode(existing);
