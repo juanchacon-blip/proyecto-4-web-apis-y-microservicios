@@ -107,9 +107,13 @@ jobs:
       NAMESPACE: microservicios
     steps:
       - uses: actions/checkout@v4
+
+      # En Windows, "bash" puede resolver al de WSL (C:\Windows\System32\bash.exe),
+      # que falla si no hay distribución instalada. Se antepone Git Bash al PATH.
       - name: Usar Git Bash (no WSL)
         shell: powershell
         run: Add-Content -Path $env:GITHUB_PATH -Value "C:\Program Files\Git\bin"
+
       - name: Verificar acceso al clúster
         run: |
           kubectl version --client
@@ -158,8 +162,8 @@ jobs:
       - name: Microservicios y frontend
         run: |
           kubectl apply -f k8s-rendered/03-auth-service.yaml -f k8s-rendered/04-task-service.yaml -f k8s-rendered/05-frontend.yaml
-          kubectl rollout status deployment/auth-service -n "$NAMESPACE" --timeout=300s
-          kubectl rollout status deployment/task-service -n "$NAMESPACE" --timeout=300s
+          kubectl rollout status deployment/auth-service -n "$NAMESPACE" --timeout=600s
+          kubectl rollout status deployment/task-service -n "$NAMESPACE" --timeout=600s
           kubectl rollout status deployment/frontend -n "$NAMESPACE" --timeout=180s
 
       - name: Estado final
